@@ -1,181 +1,136 @@
 <template>
   <div class='dashboard'>
-    <!--{{rawData}}-->
-
-    <div id='chart'></div>
-
-    <!--<el-input-->
-    <!--type='textarea'-->
-    <!--:rows='2'-->
-    <!--placeholder='请输入内容'-->
-    <!--v-model='rawData'>-->
-    <!--</el-input>-->
-
-    <!--<template>-->
-    <!--<el-table-->
-    <!--:data='rawData.data'-->
-    <!--style='width: 100%'>-->
-    <!--<el-table-column-->
-    <!--prop='date'-->
-    <!--label='日期'-->
-    <!--width='180'>-->
-    <!--</el-table-column>-->
-    <!--<el-table-column-->
-    <!--prop='name'-->
-    <!--label='姓名'-->
-    <!--width='180'>-->
-    <!--</el-table-column>-->
-    <!--<el-table-column-->
-    <!--prop='address'-->
-    <!--label='地址'>-->
-    <!--</el-table-column>-->
-    <!--</el-table>-->
-    <!--</template>-->
+    <el-row :gutter="10">
+      <el-col :span="4">
+        {{hotSettings.data}}
+      </el-col>
+      <el-col :span="16">
+        <div id='chart'></div>
+      </el-col>
+      <el-col :span="4">
+        <HotTable :root="root" :settings="hotSettings"></HotTable>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
 <script>
   import echarts from 'echarts'
+  import HotTable from 'vue-handsontable-official'
   import 'echarts-gl'
 
-//  let airDatas = [['Goroka', 'Goroka', 'Papua New Guinea', 145.391881, -6.081689]]
+  function* drawChart (vm) {
+    let result = yield vm.$http.get('/static/execute.json')
+
+    let chartInstance = echarts.init(result.chartDom)
+
+    chartInstance.setOption({
+      title: {
+        text: '世界人口总量',
+        subtext: '数据来自网络'
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        }
+      },
+//        legend: {
+//          data: ['2011年', '2012年']
+//        },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      yAxis: {
+        type: 'value',
+        boundaryGap: [0, 0.01]
+      },
+      xAxis: {
+        type: 'category',
+        data: result.dimensionData
+      },
+      series: [
+        {
+//            name: '2011年',
+          type: 'bar',
+          data: result.measureData
+        }
+      ]
+    })
+    yield chartInstance
+  }
 
   export default {
     name: 'dashboard',
-
+    components: {
+      HotTable
+    },
     data () {
       return {
         test: 'test - value',
-        rawData: {}
+        rawData: {},
+        root: 'test-hot',
+        hotSettings: {
+          data: [],
+          colHeaders: true,
+          contextMenu: true,
+          beforeChange: (changes, source) => {
+            console.log(changes, source)
+          }
+        }
       }
     },
 
+//    getData () {
+//      return this.$http.get('/static/execute.json').then(response => {
+//        return response.data
+//      })
+//    },
+//
+//    async drawChart () {
+//      await getData()
+//
+//    },
+
     created () {
-      let vm = this
-      this.$http.get('/static/execute.json').then(response => {
-        vm.rawData = response.data
-      })
+//      this.$http.get('/static/execute.json').then(response => {
+//        vm.rawData = response.data
+//        vm.hotSettings.data = response.data.data
+//      })
     },
 
     mounted () {
-      var myChart = echarts.init(document.getElementById('chart'))
-
-      myChart.setOption({
-        tooltip: {
-          show: true
-        },
-        backgroundColor: '#000',
-        globe: {
-
-          environment: '/static/images/data-1491837999815-H1_44Qtal.jpg',
-
-          heightTexture: '/static/images/data-1491837512042-rJlLfXYax.jpg',
-
-          displacementScale: 0.1,
-          displacementQuality: 'high',
-
-          baseColor: '#000',
-
-          shading: 'realistic',
-          realisticMaterial: {
-            roughness: 0.2,
-            metalness: 0
-          },
-
-          postEffect: {
-            enable: true,
-            depthOfField: {
-              enable: false,
-              focalDistance: 150
-            }
-          },
-          temporalSuperSampling: {
-            enable: true
-          },
-          light: {
-            ambient: {
-              intensity: 0
-            },
-            main: {
-              intensity: 0.1,
-              shadow: false
-            },
-            ambientCubemap: {
-              texture: '/static/images/data-1491837984109-r1u7NmY6e.hdr',
-              exposure: 1,
-              diffuseIntensity: 0.5,
-              specularIntensity: 2
-            }
-          },
-          viewControl: {
-            autoRotate: false
-          },
-          silent: true
-        },
-        series: [{
-          type: 'lines3D',
-          name: 'Air China',
-
-          effect: {
-            show: true,
-            trailWidth: 2,
-            trailLength: 0.15,
-            trailOpacity: 1,
-            trailColor: 'rgb(30, 30, 60)'
-          },
-
-          lineStyle: {
-            width: 2,
-            color: 'rgb(50, 50, 150)',
-            // color: 'rgb(118, 233, 241)',
-            opacity: 1
-          },
-          blendMode: 'lighter',
-
-          data: [
-            [
-              [104.9587, 25.0882],
-              [87.474244, 43.907106]
-            ],
-            [
-              [104.9587, 25.0882],
-              [113.298786, 23.392436]
-            ]
-          ]
-        }, {
-          type: 'scatter3D',
-          coordinateSystem: 'globe',
-          blendMode: 'lighter',
-          symbolSize: 20,
-          itemStyle: {
-            color: 'rgb(50, 50, 150)',
-            opacity: 0.2
-          },
-          label: {
-            position: 'bottom',
-            formatter: function () {
-              return ''
-            }
-          },
-          data: [
-            {
-              name: '地点',
-              symbolSize: 30,
-              value: [104.9587, 25.0882]
-            }
-          ]
-        }
-
-        ]
+      let vm = this
+      let draw = drawChart(vm)
+      draw.next().value.then((response) => {
+        vm.rawData = response.data
+        vm.hotSettings.data = response.data.data
+        return response.data
+      }).then((data) => {
+        let dimensionData, measureData
+        dimensionData = data.data.map((item) => {
+          return item[0]
+        })
+        measureData = data.data.map((item) => {
+          return item[1]
+        })
+        draw.next({
+          dimensionData: dimensionData,
+          measureData: measureData,
+          chartDom: document.getElementById('chart')
+        })
       })
     }
 
   }
 </script>
 
-<style scoped>
+<style>
   #chart{
-    width: 1000px;
-    height: 1000px;
+    width: 100%;
+    height: 700px;
   }
 </style>
