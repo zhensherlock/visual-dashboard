@@ -1,31 +1,34 @@
 <template>
   <el-tabs type="type">
-    <el-tab-pane label="数据管理">
+    <template v-if="option.type != 'canvas'">
 
-      <HotTable :root="root" :settings="hotSettings"></HotTable>
+      <el-tab-pane label="数据管理">
 
-    </el-tab-pane>
-    <el-tab-pane label="样式管理">
+        <HotTable ref="chartDataHot" :root="root" :settings="hotSettings"></HotTable>
 
-      <div id="chart-title">
-        <el-checkbox v-model="chartOptions.chartTitle.visible" @change="repaint">显示标题</el-checkbox>
-        <el-input v-model="chartOptions.chartTitle.text" placeholder="请输入标题" @change="repaint"></el-input>
-        <el-radio-group v-model="chartOptions.chartTitle.textAlign" @change="repaint">
-          <el-radio-button label="left"></el-radio-button>
-          <el-radio-button label="center"></el-radio-button>
-          <el-radio-button label="right"></el-radio-button>
-        </el-radio-group>
-      </div>
+      </el-tab-pane>
+      <el-tab-pane label="样式管理">
+        <div id="chart-title">
+          <el-checkbox v-model="option.chartOptions.chartTitle.visible" @change="repaint">显示标题</el-checkbox>
+          <el-input v-model="option.chartOptions.chartTitle.text" placeholder="请输入标题" @change="repaint"></el-input>
+          <el-radio-group v-model="option.chartOptions.chartTitle.textAlign" @change="repaint">
+            <el-radio-button label="left"></el-radio-button>
+            <el-radio-button label="center"></el-radio-button>
+            <el-radio-button label="right"></el-radio-button>
+          </el-radio-group>
+        </div>
 
-      <div id="chart-option">
-        <ul>
-          <li v-on:click="setChartType('bar')">bar</li>
-          <li v-on:click="setChartType('line')">line</li>
-          <li v-on:click="setChartType('pie')">pie</li>
-        </ul>
-      </div>
+        <div id="chart-option">
+          <ul>
+            <li v-on:click="setChartType('bar')">bar</li>
+            <li v-on:click="setChartType('line')">line</li>
+            <li v-on:click="setChartType('pie')">pie</li>
+          </ul>
+        </div>
 
-    </el-tab-pane>
+      </el-tab-pane>
+
+    </template>
   </el-tabs>
 </template>
 
@@ -44,19 +47,11 @@
     components: {
       HotTable
     },
+    props: ['option'],
     data () {
       return {
-        test: 'test - value',
         rawData: {},
         root: 'chart-data-hot',
-        chartOptions: {
-          chartType: 'bar',
-          chartTitle: {
-            visible: true,
-            text: '图标名称',
-            textAlign: 'center'
-          }
-        },
         hotSettings: {
           data: [],
           colHeaders: true,
@@ -65,8 +60,7 @@
             if (changes[0][2] !== changes[0][3]) {
               updateData({
                 changes: changes,
-                chartRawData: this.rawData,
-                chartOptions: this.chartOptions
+                chartRawData: this.rawData
               })
             }
             console.log(changes, source)
@@ -76,11 +70,25 @@
     },
 
     mounted () {
+      let vm = this
+      this.$watch('option.rawData', (newVal, oldVal) => {
+        console.log(newVal, vm.$refs)
+        vm.$refs.chartDataHot.table.loadData(newVal.data)
+        vm.$refs.chartDataHot.table.render()
+      })
+      this.$watch('option', (newVal, oldVal) => {
+        console.log(newVal, vm.$refs)
+        vm.$refs.chartDataHot.table.loadData(newVal.rawData.data)
+        vm.$refs.chartDataHot.table.render()
+      })
+      if (this.option && this.option.rawData) {
+        this.hotSettings.data = this.option.rawData.data
+      }
     },
 
     methods: {
       setChartType (chartType) {
-        this.chartOptions.chartType = chartType
+        this.option.chartOptions.chartType = chartType
       },
 
       repaint () {
@@ -91,4 +99,8 @@
 </script>
 
 <style>
+  #chart-data-hot{
+    height: 700px;
+    width: 100%;
+  }
 </style>
