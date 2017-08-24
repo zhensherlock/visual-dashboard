@@ -1,13 +1,13 @@
 <template>
-  <el-tabs type="type">
-    <template v-if="option.type != 'canvas'">
+  <el-tabs type="type" v-model="tabActiveName">
+    <template>
 
-      <el-tab-pane label="数据管理">
+      <el-tab-pane label="数据管理" name="dataManage" v-if="option.type != 'canvas'">
 
         <HotTable ref="chartDataHot" :root="root" :settings="hotSettings"></HotTable>
 
       </el-tab-pane>
-      <el-tab-pane label="样式管理">
+      <el-tab-pane label="样式管理" name="styleManage" v-if="option.type != 'canvas'">
         <div id="chart-title">
           <el-checkbox v-model="option.chartOptions.chartTitle.visible" @change="repaint">显示标题</el-checkbox>
           <el-input v-model="option.chartOptions.chartTitle.text" placeholder="请输入标题" @change="repaint"></el-input>
@@ -28,19 +28,18 @@
 
       </el-tab-pane>
 
+      <el-tab-pane label="画布管理" name="canvasManage" v-if="option.type == 'canvas'">
+
+        画布管理
+
+      </el-tab-pane>
+
     </template>
   </el-tabs>
 </template>
 
 <script>
   import HotTable from 'vue-handsontable-official'
-
-  function updateData (params) {
-    let changes = params.changes
-    let chartRawData = params.chartRawData
-//    let chartOptions = params.chartOptions
-    chartRawData.data[changes[0][0]][changes[0][1]] = changes[0][3]
-  }
 
   export default {
     name: 'chartOption',
@@ -49,8 +48,9 @@
     },
     props: ['option'],
     data () {
+      let vm = this
       return {
-        rawData: {},
+        tabActiveName: 'canvasManage',
         root: 'chart-data-hot',
         hotSettings: {
           data: [],
@@ -58,12 +58,10 @@
           contextMenu: true,
           beforeChange: (changes, source) => {
             if (changes[0][2] !== changes[0][3]) {
-              updateData({
-                changes: changes,
-                chartRawData: this.rawData
+              vm.updateData({
+                changes: changes
               })
             }
-            console.log(changes, source)
           }
         }
       }
@@ -71,15 +69,11 @@
 
     mounted () {
       let vm = this
-      this.$watch('option.rawData', (newVal, oldVal) => {
-        console.log(newVal, vm.$refs)
-        vm.$refs.chartDataHot.table.loadData(newVal.data)
-        vm.$refs.chartDataHot.table.render()
-      })
       this.$watch('option', (newVal, oldVal) => {
-        console.log(newVal, vm.$refs)
-        vm.$refs.chartDataHot.table.loadData(newVal.rawData.data)
-        vm.$refs.chartDataHot.table.render()
+        vm.tabActiveName = 'dataManage'
+        vm.$nextTick(() => {
+          vm.$refs.chartDataHot.table.loadData(newVal.rawData.data)
+        })
       })
       if (this.option && this.option.rawData) {
         this.hotSettings.data = this.option.rawData.data
@@ -92,6 +86,12 @@
       },
 
       repaint () {
+      },
+
+      updateData (params) {
+        let changes = params.changes
+        this.option.rawData.data[changes[0][0]][changes[0][1]] = changes[0][3]
+        this.$emit('updateChartOption', this.option)
       }
     }
 

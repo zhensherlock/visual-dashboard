@@ -72,11 +72,11 @@
     },
 
     mounted () {
-      drawChart({
-        chartDom: this.$el,
-        remoteData: this.chartData.rawData,
-        chartOptions: this.chartData.chartOptions
-      })
+//      drawChart({
+//        chartDom: this.$el,
+//        remoteData: this.chartData.rawData,
+//        chartOptions: this.chartData.chartOptions
+//      })
     },
 
     methods: {
