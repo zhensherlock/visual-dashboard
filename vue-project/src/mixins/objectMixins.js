@@ -1,9 +1,9 @@
 var mixin = {
   methods: {
-    selectObj (e) {
-      let target = e.target
+    selectObject (event) {
+      let target = event.target
       console.log(target)
-      this.$emit('selectObj')
+      this.$emit('selectObject')
     }
   }
 }

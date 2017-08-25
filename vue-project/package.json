@@ -15,10 +15,12 @@
     "echarts": "^3.6.2",
     "echarts-gl": "^1.0.0-beta.2",
     "element-ui": "^1.3.7",
+    "lodash": "^4.17.4",
     "normalize.css": "^7.0.0",
     "vue": "^2.3.3",
     "vue-handsontable-official": "^1.0.0",
-    "vue-router": "^2.6.0"
+    "vue-router": "^2.6.0",
+    "vuex": "^2.3.1"
   },
   "devDependencies": {
     "autoprefixer": "^6.7.2",

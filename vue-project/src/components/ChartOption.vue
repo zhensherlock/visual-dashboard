@@ -1,17 +1,16 @@
 <template>
   <el-tabs type="type" v-model="tabActiveName">
     <template>
-
-      <el-tab-pane label="数据管理" name="dataManage" v-if="option.type != 'canvas'">
+      <el-tab-pane label="数据管理" name="dataManage" v-if="currentObjectData.type != 'canvas'">
 
         <HotTable ref="chartDataHot" :root="root" :settings="hotSettings"></HotTable>
 
       </el-tab-pane>
-      <el-tab-pane label="样式管理" name="styleManage" v-if="option.type != 'canvas'">
+      <el-tab-pane label="样式管理" name="styleManage" v-if="currentObjectData.type != 'canvas'">
         <div id="chart-title">
-          <el-checkbox v-model="option.chartOptions.chartTitle.visible" @change="repaint">显示标题</el-checkbox>
-          <el-input v-model="option.chartOptions.chartTitle.text" placeholder="请输入标题" @change="repaint"></el-input>
-          <el-radio-group v-model="option.chartOptions.chartTitle.textAlign" @change="repaint">
+          <el-checkbox v-model="currentObjectData.chartOptions.chartTitle.visible" @change="repaint">显示标题</el-checkbox>
+          <el-input v-model="currentObjectData.chartOptions.chartTitle.text" placeholder="请输入标题" @change="repaint"></el-input>
+          <el-radio-group v-model="currentObjectData.chartOptions.chartTitle.textAlign" @change="repaint">
             <el-radio-button label="left"></el-radio-button>
             <el-radio-button label="center"></el-radio-button>
             <el-radio-button label="right"></el-radio-button>
@@ -20,15 +19,15 @@
 
         <div id="chart-option">
           <ul>
-            <li v-on:click="setChartType('bar')">bar</li>
-            <li v-on:click="setChartType('line')">line</li>
-            <li v-on:click="setChartType('pie')">pie</li>
+            <li @click="chooseChartType('bar')">bar</li>
+            <li @click="chooseChartType('line')">line</li>
+            <li @click="chooseChartType('pie')">pie</li>
           </ul>
         </div>
 
       </el-tab-pane>
 
-      <el-tab-pane label="画布管理" name="canvasManage" v-if="option.type == 'canvas'">
+      <el-tab-pane label="画布管理" name="canvasManage" v-if="currentObjectData.type == 'canvas'">
 
         画布管理
 
@@ -40,20 +39,19 @@
 
 <script>
   import HotTable from 'vue-handsontable-official'
+  import { mapMutations } from 'vuex'
 
   export default {
     name: 'chartOption',
     components: {
       HotTable
     },
-    props: ['option'],
     data () {
       let vm = this
       return {
         tabActiveName: 'canvasManage',
         root: 'chart-data-hot',
         hotSettings: {
-          data: [],
           colHeaders: true,
           contextMenu: true,
           beforeChange: (changes, source) => {
@@ -67,22 +65,33 @@
       }
     },
 
-    mounted () {
-      let vm = this
-      this.$watch('option', (newVal, oldVal) => {
-        vm.tabActiveName = 'dataManage'
-        vm.$nextTick(() => {
-          vm.$refs.chartDataHot.table.loadData(newVal.rawData.data)
-        })
-      })
-      if (this.option && this.option.rawData) {
-        this.hotSettings.data = this.option.rawData.data
+    computed: {
+      currentObjectData () {
+        let objectData = this.$store.state.currentObjectData
+        if (objectData.type === 'chart') {
+          this.tabActiveName = 'dataManage'
+          this.$nextTick(() => {
+            this.$refs.chartDataHot.table.loadData(objectData.rawData.data)
+          })
+        }
+        return objectData
       }
     },
 
+    mounted () {
+    },
+
     methods: {
-      setChartType (chartType) {
-        this.option.chartOptions.chartType = chartType
+      ...mapMutations([
+        'setChartType',
+        'setChartRawData',
+        'updateChartData'
+      ]),
+      chooseChartType (chartType) {
+        this.setChartType({
+          objectData: this.currentObjectData,
+          chartType
+        })
       },
 
       repaint () {
@@ -90,8 +99,14 @@
 
       updateData (params) {
         let changes = params.changes
-        this.option.rawData.data[changes[0][0]][changes[0][1]] = changes[0][3]
-        this.$emit('updateChartOption', this.option)
+        this.updateChartData({
+          changes
+        })
+        this.setChartRawData({
+          rawData: this._.clone(this.currentObjectData.rawData)
+        })
+//        this.currentObjectData.rawData.data[changes[0][0]][changes[0][1]] = changes[0][3]
+//        this.currentObjectData.rawData = this._.clone(this.currentObjectData.rawData)
       }
     }
 

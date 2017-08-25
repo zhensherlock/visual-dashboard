@@ -1,5 +1,8 @@
 <template>
-  <div class='chart' v-on:click="selectObj">{{chartData}}</div>
+  <div @click="selectObject">
+    {{chartData}}
+    <div ref="chart" class="chart"></div>
+  </div>
 </template>
 
 <script>
@@ -65,6 +68,7 @@
     },
     mixins: [objectMixins],
     props: ['chartData'],
+
     data () {
       return {
         chartInstance: null
@@ -72,21 +76,37 @@
     },
 
     mounted () {
-//      drawChart({
-//        chartDom: this.$el,
-//        remoteData: this.chartData.rawData,
-//        chartOptions: this.chartData.chartOptions
-//      })
+      if (this.chartData.type === 'chart') {
+        this.chartInstance = drawChart({
+          chartDom: this.$refs.chart,
+          remoteData: this.chartData.rawData,
+          chartOptions: this.chartData.chartOptions
+        })
+      }
+    },
+
+    watch: {
+      'chartData.chartOptions.chartType': 'chartPaint',
+      'chartData.chartOptions.chartTitle.visible': 'chartPaint',
+      'chartData.chartOptions.chartTitle.text': 'chartPaint',
+      'chartData.chartOptions.chartTitle.textAlign': 'chartPaint',
+      'chartData.rawData': 'chartPaint'
     },
 
     methods: {
+      chartPaint () {
+        this.repaint({
+          rawData: this.chartData.rawData,
+          chartOptions: this.chartData.chartOptions
+        })
+      },
       repaint (params) {
         let rawData = params.rawData
-        let chartOption = params.chartOption
+        let chartOptions = params.chartOptions
         drawChart({
           chartInstance: this.chartInstance,
           remoteData: rawData,
-          chartOptions: chartOption
+          chartOptions: chartOptions
         })
       }
     }

@@ -2,17 +2,17 @@
   <div class='dashboard'>
     <el-row>
       <el-col :span="1">
-        <el-button type="primary" v-on:click="addChart">添加图表</el-button>
+        <el-button type="primary" @click="addChart">添加图表</el-button>
       </el-col>
       <el-col :span="19">
         <div class="dashboard-container">
-          <template v-for="object in objectList">
-            <Chart :chartData="object" v-on:selectObj="selectObj(object)"></Chart>
+          <template v-for="(objectData, index) in objectDataList">
+            <Chart :chartData="objectData" :key="index" @selectObject="selectObject({ objectData, index})"></Chart>
           </template>
         </div>
       </el-col>
       <el-col :span="4">
-        <ChartOption :option="currentObject" v-on:updateChartOption="updateChartOption"></ChartOption>
+        <ChartOption></ChartOption>
       </el-col>
     </el-row>
   </div>
@@ -21,6 +21,7 @@
 <script>
   import Chart from '@/components/Chart'
   import ChartOption from '@/components/ChartOption'
+  import { mapMutations } from 'vuex'
 
   export default {
     name: 'dashboard',
@@ -30,10 +31,15 @@
     },
     data () {
       return {
-        objectList: [],
-        currentObject: {
-          type: 'canvas'
-        }
+      }
+    },
+
+    computed: {
+      objectDataList () {
+        return this.$store.state.objectDataList
+      },
+      currentObjectIndex () {
+        return this.$store.state.currentObjectIndex
       }
     },
 
@@ -41,11 +47,15 @@
     },
 
     methods: {
+      ...mapMutations([
+        'addObjectData',
+        'setCurrentObjectData'
+      ]),
       addChart () {
         let vm = this
-        let newChartData = {
+        let objectData = {
           type: 'chart',
-          rawData: [],
+          rawData: {},
           chartOptions: {
             chartType: 'bar',
             chartTitle: {
@@ -57,21 +67,22 @@
         }
 
         vm.$http.get('/static/execute.json').then((response) => {
-          newChartData.rawData = response.data
-          vm.objectList.push(newChartData)
-          vm.selectObj(newChartData)
+          objectData.rawData = response.data
+          // add chart object
+          vm.addObjectData({
+            objectData
+          })
+          // set current object data
+          vm.setCurrentObjectData({
+            objectData
+          })
         })
       },
-      selectObj (obj) {
-//        this.$set(this.currentObject, 'rawData', obj.rawData)
-//        this.$set(this.currentObject, 'chartOptions', obj.chartOptions)
-//        this.$set(this.currentObject, 'type', obj.type)
-        this.currentObject = obj
-      },
-      updateChartOption (chartOption) {
-        console.log(this.objectList)
-        console.log(this.currentObject)
-//        this.currentObject.rawData = chartOption.rawData
+      selectObject ({ objectData, index }) {
+        // set current object data
+        this.setCurrentObjectData({
+          objectData
+        })
       }
     }
 
