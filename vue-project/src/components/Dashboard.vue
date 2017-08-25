@@ -1,13 +1,13 @@
 <template>
   <div class='dashboard'>
-    <el-row>
+    <el-row class="dashboard-row">
       <el-col :span="1">
-        <el-button type="primary" @click="addChart">添加图表</el-button>
+        <el-button type="primary" @click="addChart" title="添加图表" icon="plus"></el-button>
       </el-col>
       <el-col :span="19">
         <div class="dashboard-container">
           <template v-for="(objectData, index) in objectDataList">
-            <Chart :chartData="objectData" :key="index" @selectObject="selectObject({ objectData, index})"></Chart>
+            <Chart :chartData="objectData" :key="index" v-if="objectData.type=='chart'" @selectObject="selectObject({ objectData, index})"></Chart>
           </template>
         </div>
       </el-col>
@@ -92,5 +92,13 @@
 <style>
   .dashboard {
     height: 100%;
+  }
+  .dashboard-row {
+    height: 100%;
+    display: flex;
+  }
+  .dashboard-container {
+    height: 100%;
+    overflow-y: auto;
   }
 </style>

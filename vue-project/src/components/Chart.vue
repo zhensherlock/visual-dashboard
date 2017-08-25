@@ -1,6 +1,5 @@
 <template>
   <div @click="selectObject">
-    {{chartData}}
     <div ref="chart" class="chart"></div>
   </div>
 </template>
@@ -76,13 +75,11 @@
     },
 
     mounted () {
-      if (this.chartData.type === 'chart') {
-        this.chartInstance = drawChart({
-          chartDom: this.$refs.chart,
-          remoteData: this.chartData.rawData,
-          chartOptions: this.chartData.chartOptions
-        })
-      }
+      this.chartInstance = drawChart({
+        chartDom: this.$refs.chart,
+        remoteData: this.chartData.rawData,
+        chartOptions: this.chartData.chartOptions
+      })
     },
 
     watch: {
