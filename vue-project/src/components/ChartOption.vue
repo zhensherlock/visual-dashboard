@@ -8,9 +8,9 @@
       </el-tab-pane>
       <el-tab-pane label="样式管理" name="styleManage" v-if="currentObjectData.type != 'canvas'">
         <div id="chart-title">
-          <el-checkbox v-model="currentObjectData.chartOptions.chartTitle.visible" @change="repaint">显示标题</el-checkbox>
-          <el-input v-model="currentObjectData.chartOptions.chartTitle.text" placeholder="请输入标题" @change="repaint"></el-input>
-          <el-radio-group v-model="currentObjectData.chartOptions.chartTitle.textAlign" @change="repaint">
+          <el-checkbox v-model="currentObjectData.chartOptions.chartTitle.visible" @change="resetChartOptions">显示标题</el-checkbox>
+          <el-input v-model="currentObjectData.chartOptions.chartTitle.text" placeholder="请输入标题" @change="resetChartOptions"></el-input>
+          <el-radio-group v-model="currentObjectData.chartOptions.chartTitle.textAlign" @change="resetChartOptions">
             <el-radio-button label="left"></el-radio-button>
             <el-radio-button label="center"></el-radio-button>
             <el-radio-button label="right"></el-radio-button>
@@ -84,7 +84,8 @@
     methods: {
       ...mapMutations([
         'setChartType',
-        'setChartRawData',
+        'setCurrentChartRawData',
+        'setCurrentChartOptions',
         'updateChartData'
       ]),
       chooseChartType (chartType) {
@@ -92,9 +93,15 @@
           objectData: this.currentObjectData,
           chartType
         })
+        this.setCurrentChartOptions({
+          chartOptions: this._.clone(this.currentObjectData.chartOptions)
+        })
       },
 
-      repaint () {
+      resetChartOptions () {
+        this.setCurrentChartOptions({
+          chartOptions: this._.clone(this.currentObjectData.chartOptions)
+        })
       },
 
       updateData (params) {
@@ -102,7 +109,7 @@
         this.updateChartData({
           changes
         })
-        this.setChartRawData({
+        this.setCurrentChartRawData({
           rawData: this._.clone(this.currentObjectData.rawData)
         })
 //        this.currentObjectData.rawData.data[changes[0][0]][changes[0][1]] = changes[0][3]

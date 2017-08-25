@@ -19,7 +19,10 @@ export const mutations = {
   updateChartData (state, { changes }) {
     state.currentObjectData.rawData.data[changes[0][0]][changes[0][1]] = changes[0][3]
   },
-  setChartRawData (state, { rawData }) {
+  setCurrentChartRawData (state, { rawData }) {
     state.currentObjectData.rawData = rawData
+  },
+  setCurrentChartOptions (state, { chartOptions }) {
+    state.currentObjectData.chartOptions = chartOptions
   }
 }

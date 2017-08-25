@@ -86,10 +86,7 @@
     },
 
     watch: {
-      'chartData.chartOptions.chartType': 'chartPaint',
-      'chartData.chartOptions.chartTitle.visible': 'chartPaint',
-      'chartData.chartOptions.chartTitle.text': 'chartPaint',
-      'chartData.chartOptions.chartTitle.textAlign': 'chartPaint',
+      'chartData.chartOptions': 'chartPaint',
       'chartData.rawData': 'chartPaint'
     },
 
