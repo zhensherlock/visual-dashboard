@@ -126,6 +126,14 @@
   .chart-option-tab {
     height: 100%;
   }
+  .chart-option-tab .el-tabs__nav {
+    display: flex;
+    float: none;
+  }
+  .chart-option-tab .el-tabs__item {
+    flex: auto;
+    text-align: center;
+  }
   .chart-option-tab .el-tabs__content {
     height: calc(100% - 42px - 30px);
   }

@@ -7,7 +7,9 @@
       <el-col :span="19">
         <div class="dashboard-container">
           <template v-for="(objectData, index) in objectDataList">
-            <Chart :chartData="objectData" :key="index" v-if="objectData.type=='chart'" @selectObject="selectObject({ objectData, index})"></Chart>
+            <Chart v-bind:class="{ active: currentObjectData == objectData }"
+                   :chartData="objectData" :key="index" v-if="objectData.type=='chart'"
+                   @selectObject="selectObject({ objectData, index})"></Chart>
           </template>
         </div>
       </el-col>
@@ -38,8 +40,8 @@
       objectDataList () {
         return this.$store.state.objectDataList
       },
-      currentObjectIndex () {
-        return this.$store.state.currentObjectIndex
+      currentObjectData () {
+        return this.$store.state.currentObjectData
       }
     },
 
@@ -100,5 +102,16 @@
   .dashboard-container {
     height: 100%;
     overflow-y: auto;
+  }
+  .dashboard-container > * {
+    border: 1px solid transparent;
+    margin-bottom: 10px;
+  }
+  .dashboard-container > *:hover {
+    border: 1px dashed #4f80ff;
+  }
+  .dashboard-container > .active {
+    /*outline: #4f80ff solid 1px;*/
+    border: 1px solid #4f80ff;
   }
 </style>
