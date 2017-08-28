@@ -39,7 +39,7 @@
         left: '3%',
         right: '4%',
         bottom: '3%',
-        top: '40',
+        top: chartOptions.chartTitle.visible ? '40' : '10',
         containLabel: true
       },
       yAxis: {
